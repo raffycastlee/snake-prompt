@@ -5,12 +5,13 @@ deployed [here]().inspired by [ben's snake app](https://benspector3.github.io/sn
 ## todo
 
 - [x] ui boxes
+- [x] food starts at fixed point (10,30)
 - [x] randomize food point
 - [ ] snake movement
 - [ ] snake growing + trail
-- [ ] rainbow snake
 - [ ] food point timer
 - [ ] scoring
 - [ ] high score per session
 - [ ] convert prompts and alerts to modals
+- [ ] rainbow snake
 - [ ] maybe make a start menu

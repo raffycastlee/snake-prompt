@@ -9,6 +9,8 @@ body {
   flex-direction: column;
   background-color: #1e1e2e;
   gap: 20px;
+  height: 100%;
+  overflow: hidden;
 }
 
 #header {
@@ -39,5 +41,9 @@ body {
 }
 
 .food {
-  background-color: red;
+  background-color: #f38ba8;
+}
+
+.head {
+  background-color: #a5e2a0;
 }

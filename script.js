@@ -1,7 +1,12 @@
 const mainGrid = document.getElementById("main-box");
-let currentSquare = document.querySelector("food");
-let prevX = Math.floor(Math.random() * 40);
-let prevY = Math.floor(Math.random() * 40);
+let foodSquare = document.querySelector("food");
+let headSquare = document.querySelector("head");
+// start food at (30, 10)
+let prevX = 0;
+let prevY = 0;
+// start snake at (10,30)
+let headX = 0;
+let headY = 0;
 
 const initBoard = () => {
   let rowIndex = 0;
@@ -34,30 +39,90 @@ const initBoard = () => {
   );
 };
 
-const generateApple = () => {
+const generateApple = (
+  x = Math.floor(Math.random() * 40),
+  y = Math.floor(Math.random() * 40)
+) => {
   // makes sure there's no repeat coords
-  let x = Math.floor(Math.random() * 40);
-  let y = Math.floor(Math.random() * 40);
   while (x === prevX && y === prevY) {
     x = Math.floor(Math.random() * 40);
     y = Math.floor(Math.random() * 40);
   }
+  prevX = x;
+  prevY = y;
+
   console.log(`setting new food square`);
 
-  if (currentSquare !== null) {
-    currentSquare.classList.remove("food");
+  if (foodSquare !== null) {
+    foodSquare.classList.remove("food");
     currentRow = document.querySelector(`#row-${y}`);
-    currentSquare = currentRow.querySelector(`#column-${x}`);
-    currentSquare.setAttribute("class", "column food");
+    foodSquare = currentRow.querySelector(`#column-${x}`);
+    foodSquare.setAttribute("class", "column food");
   } else {
     currentRow = document.querySelector(`#row-${y}`);
     console.log(y);
     console.log(currentRow);
-    currentSquare = currentRow.querySelector(`#column-${x}`);
-    currentSquare.setAttribute("class", "column food");
+    foodSquare = currentRow.querySelector(`#column-${x}`);
+    foodSquare.setAttribute("class", "column food");
   }
 };
 
+// stores snake data
+let playerData = {
+  "head": headSquare,
+  "length": 1,
+  "orientation": null
+}
+
+const generateSnake = (x,y) => {
+  if (headSquare !== null) {
+    headSquare.classList.remove("head");
+    currentRow = document.querySelector(`#row-${y}`);
+    headSquare = currentRow.querySelector(`#column-${x}`); 
+    // holy shit how do i handle collision
+    headSquare.setAttribute("class", "column head");
+  } else {
+    currentRow = document.querySelector(`#row-${y}`);
+    console.log(y);
+    console.log(currentRow);
+    headSquare = currentRow.querySelector(`#column-${x}`);
+    // holy shit how do i handle collision
+    headSquare.setAttribute("class", "column head");
+  }  
+}
+
+const moveSnake = (x,y) => {
+  // how the fuck do i track the body?
+  // can't be just a fade
+  // i want to off myself
+  if (playerData.orientation === 'Left') {
+
+  } else if (playerData.orientation === 'Right') {
+
+  } else if (playerData.orientation === 'Down') {
+
+  } else if (playerData.orientation === 'Up') {
+
+  } else { // all other keypresses just ignore
+
+  }
+}
+
+// flag to check if game has already started
+let gameStarted = false;
+// starts game
+onkeydown = (e) => {
+  playerData.orientation = e.key.slice(5);
+  console.log(playerData);
+  // makes sure generate doesn't happen more than once naturally
+  if (!gameStarted) {
+    gameStarted = true;
+    setInterval(generateApple, 10000);
+  }
+  setInterval(moveSnake, 10);
+}
+
 initBoard();
-generateApple();
-setInterval(generateApple, 10000);
+generateApple(10, 30);
+generateSnake(30, 10);
+// setInterval(generateApple, 10);
