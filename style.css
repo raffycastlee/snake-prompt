@@ -1,0 +1,43 @@
+*:not(title, head) {
+  display: flex;
+  justify-content: center;
+  color: #cdd6f4;
+  font-family: "Iosevka Web";
+}
+
+body {
+  flex-direction: column;
+  background-color: #1e1e2e;
+  gap: 20px;
+}
+
+#header {
+  padding-top: 10px;
+  justify-content: space-evenly;
+}
+
+#main-box {
+  flex-direction: column;
+  flex-grow: 0;
+  align-items: center;
+  height: 500px;
+  max-height: 500px;
+  width: 500px;
+  max-width: 500px;
+  border: solid #cdd6f4;
+  border-width: 5px;
+}
+
+.row {
+  height: 12.5px;
+  width: 100%;
+}
+
+.column {
+  height: 100%;
+  width: 12.5px;
+}
+
+.food {
+  background-color: red;
+}
