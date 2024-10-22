@@ -1,3 +1,4 @@
+// obtain necessary elements
 const mainGrid = document.getElementById("main-box");
 let foodSquare = document.querySelector("food");
 let headSquare = document.querySelector("head");
@@ -9,13 +10,16 @@ let headX = 0;
 let headY = 0;
 
 const initBoard = () => {
+  // coordinates for squares
   let rowIndex = 0;
   let columnIndex = 0;
 
   // console.log("entered init");
 
+  // create rows...
   mainGrid.replaceChildren(
     ...[...Array(40)].map(() => {
+      // reset column# for each row
       columnIndex = 0;
       const row = document.createElement("div");
 
@@ -23,6 +27,7 @@ const initBoard = () => {
 
       row.setAttribute("class", "row");
       row.setAttribute("id", `row-${rowIndex++}`);
+      // create columns
       row.replaceChildren(
         ...[...Array(40)].map(() => {
           const column = document.createElement("div");
@@ -40,19 +45,24 @@ const initBoard = () => {
 };
 
 const generateApple = (
+  // randomizes the apple coordinates for every call
   x = Math.floor(Math.random() * 40),
   y = Math.floor(Math.random() * 40)
 ) => {
-  // makes sure there's no repeat coords
+  // makes sure that new coord != most recent/last coord
+  // TODO: logic has to account for snake body
   while (x === prevX && y === prevY) {
     x = Math.floor(Math.random() * 40);
     y = Math.floor(Math.random() * 40);
   }
+  // keeps track of what the previous coord was!
   prevX = x;
   prevY = y;
 
-  console.log(`setting new food square`);
+  // console.log(`setting new food square`);
 
+  // just the base case
+  // there has to be a better way to handle this
   if (foodSquare !== null) {
     foodSquare.classList.remove("food");
     currentRow = document.querySelector(`#row-${y}`);
@@ -60,8 +70,6 @@ const generateApple = (
     foodSquare.setAttribute("class", "column food");
   } else {
     currentRow = document.querySelector(`#row-${y}`);
-    console.log(y);
-    console.log(currentRow);
     foodSquare = currentRow.querySelector(`#column-${x}`);
     foodSquare.setAttribute("class", "column food");
   }
@@ -75,6 +83,8 @@ let playerData = {
 }
 
 const generateSnake = (x,y) => {
+  // base case again
+  // again there has to be a better way to do base case
   if (headSquare !== null) {
     headSquare.classList.remove("head");
     currentRow = document.querySelector(`#row-${y}`);
@@ -83,8 +93,6 @@ const generateSnake = (x,y) => {
     headSquare.setAttribute("class", "column head");
   } else {
     currentRow = document.querySelector(`#row-${y}`);
-    console.log(y);
-    console.log(currentRow);
     headSquare = currentRow.querySelector(`#column-${x}`);
     // holy shit how do i handle collision
     headSquare.setAttribute("class", "column head");
@@ -112,16 +120,19 @@ const moveSnake = (x,y) => {
 let gameStarted = false;
 // starts game
 onkeydown = (e) => {
+  // removes the 'Arrow'- prefix onkeydown event
   playerData.orientation = e.key.slice(5);
-  console.log(playerData);
   // makes sure generate doesn't happen more than once naturally
   if (!gameStarted) {
     gameStarted = true;
-    setInterval(generateApple, 10000);
+    setInterval(generateApple, 1000);
   }
   setInterval(moveSnake, 10);
 }
 
+
+
+// ------------------ START GAME ------------------ // 
 initBoard();
 generateApple(10, 30);
 generateSnake(30, 10);
