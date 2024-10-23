@@ -11,7 +11,10 @@ deployed [here]().inspired by [ben's snake app](https://benspector3.github.io/sn
 - [x] food point timer
 - [x] scoring
 - [x] high score per session
-- [ ] snake growing + trail
+- [x] snake growing Past the first food LOL
+- [ ] snake body has a break when eating
+- [ ] fix snake growing base case
+- [ ] fix phantom food MISSING! when food eaten at specific interval
 - [ ] convert prompts and alerts to modals
 - [ ] rainbow snake
 - [ ] maybe make a start menu

@@ -1,3 +1,77 @@
+// YOINKED FROM THE WEB
+// https://www.geeksforgeeks.org/deque-in-javascript/
+// DEQUE bc built-in js is apparently trash!
+class Deque {
+  constructor() {
+    this.deque = [];
+  }
+
+  addFront(element) {
+    this.deque.unshift(element);
+  }
+
+  addRear(element) {
+    this.deque.push(element);
+  }
+
+  removeFront() {
+    if (!this.isEmpty()) {
+      return this.deque.shift();
+    }
+    return null;
+  }
+
+  removeRear() {
+    if (!this.isEmpty()) {
+      return this.deque.pop();
+    }
+    return null;
+  }
+
+  getFront() {
+    if (!this.isEmpty()) {
+      return this.deque[0];
+    }
+    return null;
+  }
+
+  getRear() {
+    if (!this.isEmpty()) {
+      return this.deque[this.size() - 1];
+    }
+    return null;
+  }
+
+  isEmpty() {
+    return this.deque.length === 0;
+  }
+
+  size() {
+    return this.deque.length;
+  }
+}
+
+// // Create a e
+// const deque = new Deque();
+
+// // Adding 10, 20 to end of deque
+// deque.addRear(10);
+// deque.addRear(20);
+
+// // Adding 5 to the front of deque
+// deque.addFront(5);
+
+// // Accessing deque array from deque object
+
+// // Get first element of deque
+
+// // Get last element of deque
+
+// // Removing item at the front of array
+// deque.removeFront();
+
+// // Removing item at the end of array
+// deque.removeRear();
 // obtain necessary elements
 const mainGrid = document.getElementById("main-box");
 let foodSquare = document.querySelector("food");
@@ -17,8 +91,6 @@ const initBoard = () => {
   let rowIndex = 0;
   let columnIndex = 0;
 
-  // console.log("entered init");
-
   // create rows...
   mainGrid.replaceChildren(
     ...[...Array(40)].map(() => {
@@ -26,16 +98,12 @@ const initBoard = () => {
       columnIndex = 0;
       const row = document.createElement("div");
 
-      // console.log(`creating ${rowIndex}th row`);
-
       row.setAttribute("class", "row");
       row.setAttribute("id", `row-${rowIndex++}`);
       // create columns
       row.replaceChildren(
         ...[...Array(40)].map(() => {
           const column = document.createElement("div");
-
-          // console.log(`creating ${columnIndex}th column`);
 
           column.setAttribute("class", "column");
           column.setAttribute("id", `column-${columnIndex++}`);
@@ -62,8 +130,6 @@ const generateApple = (
   prevX = x;
   prevY = y;
 
-  // console.log(`setting new food square`);
-
   // just the base case
   // there has to be a better way to handle this
   if (foodSquare !== null) {
@@ -85,7 +151,7 @@ let playerData = {
   orientation: null,
   tempOrientation: null,
   // body is going to be an arr of xy values
-  body: [],
+  body: new Deque(),
   currScore: 0,
   highScore: 0,
 };
@@ -98,9 +164,13 @@ const generateSnake = (x, y) => {
     currentRow = document.querySelector(`#row-${y}`);
     headSquare = currentRow.querySelector(`#column-${x}`);
     // holy shit how do i handle collision
-    // console.log(headSquare.classList[1]);
     if (headSquare.classList[1] === "food") {
       updateCurrScore();
+
+      // append to body
+      playerData.body.addRear([x, y]);
+
+      // resets the food
       clearInterval(foodInterval);
       generateApple();
       foodInterval = setInterval(generateApple, 5000);
@@ -116,6 +186,22 @@ const generateSnake = (x, y) => {
     playerData.head[0] = x;
     playerData.head[1] = y;
   }
+};
+
+const generateBody = (coords) => {
+  for (const val of coords.deque) {
+    currentRow = document.querySelector(`#row-${val[1]}`);
+    let body = currentRow.querySelector(`#column-${val[0]}`);
+    // holy shit how do i handle collision
+    body.setAttribute("class", "column body");
+  }
+};
+
+const clearTile = (coord) => {
+  currentRow = document.querySelector(`#row-${coord[1]}`);
+  let body = currentRow.querySelector(`#column-${coord[0]}`);
+
+  body.setAttribute("class", "column");
 };
 
 const updateCurrScore = () => {
@@ -138,27 +224,54 @@ const moveSnake = () => {
   // how the fuck do i track the body?
   // can't be just a fade
   // i want to off myself
+
+  let rearHolder = null;
+  let prevHead = null;
   if (playerData.orientation === "Left") {
+    prevHead = playerData.head;
     playerData.head[0]--;
-    // console.log("snake left");
+    if (playerData.currScore > 0) {
+      playerData.body.addFront([playerData.head[0], playerData.head[1]]);
+      rearHolder = playerData.body.removeRear();
+    }
   } else if (playerData.orientation === "Right") {
+    prevHead = playerData.head;
     playerData.head[0]++;
-    // console.log("snake right");
+    if (playerData.currScore > 0) {
+      playerData.body.addFront([playerData.head[0], playerData.head[1]]);
+      rearHolder = playerData.body.removeRear();
+    }
   } else if (playerData.orientation === "Down") {
+    prevHead = playerData.head;
     playerData.head[1]++;
-    // console.log("snake down");
+    if (playerData.currScore > 0) {
+      playerData.body.addFront([playerData.head[0], playerData.head[1]]);
+      rearHolder = playerData.body.removeRear();
+    }
   } else if (playerData.orientation === "Up") {
+    prevHead = playerData.head;
     playerData.head[1]--;
-    // console.log("snake up");
+    if (playerData.currScore > 0) {
+      playerData.body.addFront([playerData.head[0], playerData.head[1]]);
+      rearHolder = playerData.body.removeRear();
+    }
   } else {
     // all other keypresses just ignore
-    // console.log("keypress ignored");
   }
 
-  // console.log(playerData.head)
   try {
     generateSnake(playerData.head[0], playerData.head[1]);
+    // if (prevHead) {
+    //   playerData.body.addFront(prevHead);
+    // }
+    if (playerData.body.size() > 0) {
+      generateBody(playerData.body);
+    }
+    if (rearHolder) {
+      clearTile(rearHolder);
+    }
   } catch (err) {
+    console.log(err);
     terminateGame();
   }
 };
@@ -167,8 +280,6 @@ const moveSnake = () => {
 let gameStarted = false;
 // starts game
 onkeydown = (e) => {
-  console.log(e.key.slice(5));
-  console.log(gameStarted);
   // makes sure generate doesn't happen more than once naturally
   if (!gameStarted) {
     gameStarted = true;
@@ -214,7 +325,6 @@ onkeydown = (e) => {
       playerData.tempOrientation = keypress;
     }
   }
-  // console.log(playerData);
 };
 
 const terminateGame = () => {
@@ -227,8 +337,9 @@ const terminateGame = () => {
   playerData.head.length = 0;
   playerData.highScore = Math.max(playerData.currScore, playerData.highScore);
   playerData.currScore = 0;
-  updateHighScore();
+  playerData.body = new Deque();
   gameStarted = false;
+  updateHighScore();
   clearInterval(snakeInterval);
   clearInterval(foodInterval);
   initBoard();
