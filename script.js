@@ -1,3 +1,5 @@
+// const Deque = require('./deque.js');
+// import Deque from 'deque.js';
 // YOINKED FROM THE WEB
 // https://www.geeksforgeeks.org/deque-in-javascript/
 // DEQUE bc built-in js is apparently trash!
@@ -72,6 +74,9 @@ class Deque {
 
 // // Removing item at the end of array
 // deque.removeRear();
+
+
+
 // obtain necessary elements
 const mainGrid = document.getElementById("main-box");
 let foodSquare = document.querySelector("food");

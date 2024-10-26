@@ -1,7 +1,7 @@
 // YOINKED FROM THE WEB
 // https://www.geeksforgeeks.org/deque-in-javascript/
 // DEQUE bc built-in js is apparently trash!
-class Deque {
+export default class Deque {
   constructor() {
     this.deque = [];
   }
@@ -77,3 +77,5 @@ class Deque {
 // // Removing item at the end of array
 // deque.removeRear();
 // console.log(deque.deque);
+
+// module.exports = Deque;
