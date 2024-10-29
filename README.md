@@ -18,3 +18,4 @@ deployed [here]().inspired by [ben's snake app](https://benspector3.github.io/sn
 - [ ] convert prompts and alerts to modals
 - [ ] rainbow snake
 - [ ] maybe make a start menu
+- [ ] vectorize the whole thing? no more grid, just plain animations and circles

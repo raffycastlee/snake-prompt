@@ -8,6 +8,10 @@ class Deque {
     this.deque = [];
   }
 
+  toString() {
+    return this.deque;
+  }
+
   addFront(element) {
     this.deque.unshift(element);
   }
@@ -84,12 +88,11 @@ let headSquare = document.querySelector("head");
 // start food at (30, 10)
 let prevX = 0;
 let prevY = 0;
-// start snake at (10,30)
-let headX = 0;
-let headY = 0;
 // for resetting the food reset interval
 let foodInterval;
 let snakeInterval;
+// saving game state when game over
+let playerDataCopy;
 
 const initBoard = () => {
   // coordinates for squares
@@ -126,8 +129,11 @@ const generateApple = (
   y = Math.floor(Math.random() * 40)
 ) => {
   // makes sure that new coord != most recent/last coord
-  // TODO: logic has to account for snake body
-  while (x === prevX && y === prevY) {
+  // DONE: logic has to account for snake body
+  while (x === prevX && y === prevY &&
+         !playerData.head[0] === x && !playerData[1] === y &&
+         !playerData.body.find(item => item[0] === x && item[1] === y)
+  ) {
     x = Math.floor(Math.random() * 40);
     y = Math.floor(Math.random() * 40);
   }
@@ -139,46 +145,38 @@ const generateApple = (
   // there has to be a better way to handle this
   if (foodSquare !== null) {
     foodSquare.classList.remove("food");
-    currentRow = document.querySelector(`#row-${y}`);
-    foodSquare = currentRow.querySelector(`#column-${x}`);
-    foodSquare.setAttribute("class", "column food");
-  } else {
-    currentRow = document.querySelector(`#row-${y}`);
-    foodSquare = currentRow.querySelector(`#column-${x}`);
-    foodSquare.setAttribute("class", "column food");
   }
+  currentRow = document.querySelector(`#row-${y}`);
+  foodSquare = currentRow.querySelector(`#column-${x}`);
+  foodSquare.setAttribute("class", "column food");
 };
 
-// stores snake data
-let playerData = {
+const playerData = {
   head: [],
   length: 1,
   orientation: null,
   tempOrientation: null,
-  // body is going to be an arr of xy values
   body: new Deque(),
   currScore: 0,
   highScore: 0,
 };
 
 const generateSnake = (x, y) => {
-  // base case again
-  // again there has to be a better way to do base case
   if (headSquare !== null) {
     headSquare.classList.remove("head");
     currentRow = document.querySelector(`#row-${y}`);
     headSquare = currentRow.querySelector(`#column-${x}`);
-    // holy shit how do i handle collision
     if (headSquare.classList[1] === "food") {
       updateCurrScore();
-
       // append to body
-      playerData.body.addRear([x, y]);
-
+      playerData.body.addFront([x, y]);
       // resets the food
       clearInterval(foodInterval);
       generateApple();
       foodInterval = setInterval(generateApple, 5000);
+    } else if (headSquare.classList[1] === "body") {
+      // game over!
+      terminateGame();
     }
     headSquare.setAttribute("class", "column head");
     playerData.head[0] = x;
@@ -231,54 +229,55 @@ const moveSnake = () => {
   // i want to off myself
 
   let rearHolder = null;
-  let prevHead = null;
   if (playerData.orientation === "Left") {
     prevHead = playerData.head;
-    playerData.head[0]--;
     if (playerData.currScore > 0) {
       playerData.body.addFront([playerData.head[0], playerData.head[1]]);
       rearHolder = playerData.body.removeRear();
     }
+    playerData.head[0]--;
   } else if (playerData.orientation === "Right") {
     prevHead = playerData.head;
-    playerData.head[0]++;
     if (playerData.currScore > 0) {
       playerData.body.addFront([playerData.head[0], playerData.head[1]]);
       rearHolder = playerData.body.removeRear();
     }
+    playerData.head[0]++;
   } else if (playerData.orientation === "Down") {
     prevHead = playerData.head;
-    playerData.head[1]++;
     if (playerData.currScore > 0) {
       playerData.body.addFront([playerData.head[0], playerData.head[1]]);
       rearHolder = playerData.body.removeRear();
     }
+    playerData.head[1]++;
   } else if (playerData.orientation === "Up") {
     prevHead = playerData.head;
-    playerData.head[1]--;
     if (playerData.currScore > 0) {
       playerData.body.addFront([playerData.head[0], playerData.head[1]]);
       rearHolder = playerData.body.removeRear();
     }
+    playerData.head[1]--;
   } else {
     // all other keypresses just ignore
   }
 
-  try {
-    generateSnake(playerData.head[0], playerData.head[1]);
-    // if (prevHead) {
-    //   playerData.body.addFront(prevHead);
-    // }
-    if (playerData.body.size() > 0) {
-      generateBody(playerData.body);
-    }
-    if (rearHolder) {
-      clearTile(rearHolder);
-    }
-  } catch (err) {
-    console.log(err);
+  // if out of bounds
+  if (playerData.head[0] < 0 || playerData.head[0] > 39 ||
+      playerData.head[1] < 0 || playerData.head[1] > 39
+  ) {
     terminateGame();
   }
+
+  generateSnake(playerData.head[0], playerData.head[1]);
+  if (playerData.body.size() > 0) {
+    console.log("generating body");
+    generateBody(playerData.body);
+  }
+  if (rearHolder) {
+    clearTile(rearHolder);
+  }
+  // in case i want to do anything with previous gamestate
+  playerDataCopy = JSON.parse(JSON.stringify(playerData));
 };
 
 // flag to check if game has already started
@@ -290,53 +289,61 @@ onkeydown = (e) => {
     gameStarted = true;
     foodInterval = setInterval(generateApple, 5000);
   }
+  
   const keypress = e.key.slice(5);
   if (playerData.orientation === null) {
     snakeInterval = setInterval(moveSnake, 50);
     playerData.orientation = keypress;
     playerData.tempOrientation = keypress;
-    // moveSnake();
     return;
   }
   // do keypress all conditions and stop
   // if the same as last. and if polar opposite
   // removes the 'Arrow'- prefix onkeydown event
-  if (keypress === "Left") {
-    if (
-      keypress !== playerData.orientation &&
-      playerData.orientation !== "Right"
-    ) {
-      playerData.tempOrientation = keypress;
-    }
-  } else if (keypress === "Right") {
-    if (
-      keypress !== playerData.orientation &&
-      playerData.orientation !== "Left"
-    ) {
-      playerData.tempOrientation = keypress;
-    }
-  } else if (keypress === "Down") {
-    if (
-      keypress !== playerData.orientation &&
-      playerData.orientation !== "Up"
-    ) {
-      playerData.tempOrientation = keypress;
-    }
-  } else if (keypress === "Up") {
-    if (
-      keypress !== playerData.orientation &&
-      playerData.orientation !== "Down"
-    ) {
-      playerData.tempOrientation = keypress;
-    }
+  switch (keypress) {
+    case "Left":
+      if (
+        keypress !== playerData.orientation &&
+        playerData.orientation !== "Right"
+      ) {
+        playerData.tempOrientation = keypress;
+      }
+      break;
+    case "Right":
+      if (
+        keypress !== playerData.orientation &&
+        playerData.orientation !== "Left"
+      ) {
+        playerData.tempOrientation = keypress;
+      }
+      break;
+    case "Down":
+      if (
+        keypress !== playerData.orientation &&
+        playerData.orientation !== "Up"
+      ) {
+        playerData.tempOrientation = keypress;
+      }
+      break;
+    case "Up":
+      if (
+        keypress !== playerData.orientation &&
+        playerData.orientation !== "Down"
+      ) {
+        playerData.tempOrientation = keypress;
+      }
+      break;
   }
 };
 
 const terminateGame = () => {
+  if (playerData.currScore > playerData.highScore) {
+    alert(`Game over! Click 'Okay' or Press <Enter> to restart.\nNew Best: ${playerData.currScore}`);
+  } else {
+    alert(`Game over! Click 'Okay' or Press <Enter> to restart.`);
+  }
   prevX = 0;
   prevY = 0;
-  headX = 0;
-  headY = 0;
   playerData.orientation = null;
   playerData.tempOrientation = null;
   playerData.head.length = 0;
