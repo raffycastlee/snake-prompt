@@ -1,6 +1,6 @@
 # snake-prompt
 
-deployed [here]().inspired by [ben's snake app](https://benspector3.github.io/snake/)
+deployed [here](https://raffycastlee.github.io/snake-prompt/). inspired by [ben's snake app](https://benspector3.github.io/snake/)
 
 ## todo
 
@@ -12,10 +12,10 @@ deployed [here]().inspired by [ben's snake app](https://benspector3.github.io/sn
 - [x] scoring
 - [x] high score per session
 - [x] snake growing Past the first food LOL
-- [ ] snake body has a break when eating
-- [ ] fix snake growing base case
-- [ ] fix phantom food MISSING! when food eaten at specific interval
+- [x] snake body has a break when eating
+- [x] fix snake growing base case
 - [ ] convert prompts and alerts to modals
 - [ ] rainbow snake
 - [ ] maybe make a start menu
+- [ ] fix phantom food MISSING! when food eaten at specific interval
 - [ ] vectorize the whole thing? no more grid, just plain animations and circles
