@@ -1,99 +1,25 @@
-// const Deque = require('./deque.js');
-// import Deque from 'deque.js';
-// YOINKED FROM THE WEB
-// https://www.geeksforgeeks.org/deque-in-javascript/
-// DEQUE bc built-in js is apparently trash!
-class Deque {
-  constructor() {
-    this.deque = [];
-  }
-
-  toString() {
-    return this.deque;
-  }
-
-  addFront(element) {
-    this.deque.unshift(element);
-  }
-
-  addRear(element) {
-    this.deque.push(element);
-  }
-
-  removeFront() {
-    if (!this.isEmpty()) {
-      return this.deque.shift();
-    }
-    return null;
-  }
-
-  removeRear() {
-    if (!this.isEmpty()) {
-      return this.deque.pop();
-    }
-    return null;
-  }
-
-  getFront() {
-    if (!this.isEmpty()) {
-      return this.deque[0];
-    }
-    return null;
-  }
-
-  getRear() {
-    if (!this.isEmpty()) {
-      return this.deque[this.size() - 1];
-    }
-    return null;
-  }
-
-  isEmpty() {
-    return this.deque.length === 0;
-  }
-
-  size() {
-    return this.deque.length;
-  }
-}
-
-// // Create a e
-// const deque = new Deque();
-
-// // Adding 10, 20 to end of deque
-// deque.addRear(10);
-// deque.addRear(20);
-
-// // Adding 5 to the front of deque
-// deque.addFront(5);
-
-// // Accessing deque array from deque object
-
-// // Get first element of deque
-
-// // Get last element of deque
-
-// // Removing item at the front of array
-// deque.removeFront();
-
-// // Removing item at the end of array
-// deque.removeRear();
-
-
-
-// obtain necessary elements
 const mainGrid = document.getElementById("main-box");
 let foodSquare = document.querySelector("food");
 let headSquare = document.querySelector("head");
-// start food at (30, 10)
+
+// state trackers
+const playerData = {
+  head: [],
+  length: 1,
+  orientation: null,
+  tempOrientation: null,
+  body: [],
+  currScore: 0,
+  highScore: 0,
+};
 let prevX = 0;
 let prevY = 0;
-// for resetting the food reset interval
 let foodInterval;
 let snakeInterval;
-// saving game state when game over
+// currently not in use 
 let playerDataCopy;
 
+// wipes board clean
 const initBoard = () => {
   // coordinates for squares
   let rowIndex = 0;
@@ -137,12 +63,11 @@ const generateApple = (
     x = Math.floor(Math.random() * 40);
     y = Math.floor(Math.random() * 40);
   }
-  // keeps track of what the previous coord was!
+  // to avoid prev and new tile conflict
   prevX = x;
   prevY = y;
 
-  // just the base case
-  // there has to be a better way to handle this
+  // if food square still exists, wipe that square
   if (foodSquare !== null) {
     foodSquare.classList.remove("food");
   }
@@ -151,32 +76,26 @@ const generateApple = (
   foodSquare.setAttribute("class", "column food");
 };
 
-const playerData = {
-  head: [],
-  length: 1,
-  orientation: null,
-  tempOrientation: null,
-  body: new Deque(),
-  currScore: 0,
-  highScore: 0,
-};
-
 const generateSnake = (x, y) => {
+  // "moving" head coord
   if (headSquare !== null) {
     headSquare.classList.remove("head");
     currentRow = document.querySelector(`#row-${y}`);
     headSquare = currentRow.querySelector(`#column-${x}`);
+    // if head is moving into food
     if (headSquare.classList[1] === "food") {
       updateCurrScore();
       // append to body
-      playerData.body.addFront([x, y]);
+      playerData.body.unshift([x, y]);
       // resets the food
+      // if this isn't done, interval gets messed up
       clearInterval(foodInterval);
       generateApple();
       foodInterval = setInterval(generateApple, 5000);
     } else if (headSquare.classList[1] === "body") {
       // game over!
       terminateGame();
+      return;
     }
     headSquare.setAttribute("class", "column head");
     playerData.head[0] = x;
@@ -191,15 +110,16 @@ const generateSnake = (x, y) => {
   }
 };
 
+// just making body tiles
 const generateBody = (coords) => {
-  for (const val of coords.deque) {
+  for (const val of coords) {
     currentRow = document.querySelector(`#row-${val[1]}`);
     let body = currentRow.querySelector(`#column-${val[0]}`);
-    // holy shit how do i handle collision
     body.setAttribute("class", "column body");
   }
 };
 
+// for wiping tail tile
 const clearTile = (coord) => {
   currentRow = document.querySelector(`#row-${coord[1]}`);
   let body = currentRow.querySelector(`#column-${coord[0]}`);
@@ -223,42 +143,44 @@ const updateHighScore = () => {
 };
 
 const moveSnake = () => {
+  // finalizes movement input
+  // has to be done to make game properly "run" on set interval
   playerData.orientation = playerData.tempOrientation;
-  // how the fuck do i track the body?
-  // can't be just a fade
-  // i want to off myself
 
+  // to help wipe tail if it exists
   let rearHolder = null;
+
+  // moving head according to input
   if (playerData.orientation === "Left") {
     prevHead = playerData.head;
     if (playerData.currScore > 0) {
-      playerData.body.addFront([playerData.head[0], playerData.head[1]]);
-      rearHolder = playerData.body.removeRear();
+      playerData.body.unshift([playerData.head[0], playerData.head[1]]);
+      rearHolder = playerData.body.pop()
     }
     playerData.head[0]--;
   } else if (playerData.orientation === "Right") {
     prevHead = playerData.head;
     if (playerData.currScore > 0) {
-      playerData.body.addFront([playerData.head[0], playerData.head[1]]);
-      rearHolder = playerData.body.removeRear();
+      playerData.body.unshift([playerData.head[0], playerData.head[1]]);
+      rearHolder = playerData.body.pop()
     }
     playerData.head[0]++;
   } else if (playerData.orientation === "Down") {
     prevHead = playerData.head;
     if (playerData.currScore > 0) {
-      playerData.body.addFront([playerData.head[0], playerData.head[1]]);
-      rearHolder = playerData.body.removeRear();
+      playerData.body.unshift([playerData.head[0], playerData.head[1]]);
+      rearHolder = playerData.body.pop()
     }
     playerData.head[1]++;
   } else if (playerData.orientation === "Up") {
     prevHead = playerData.head;
     if (playerData.currScore > 0) {
-      playerData.body.addFront([playerData.head[0], playerData.head[1]]);
-      rearHolder = playerData.body.removeRear();
+      playerData.body.unshift([playerData.head[0], playerData.head[1]]);
+      rearHolder = playerData.body.pop()
     }
     playerData.head[1]--;
   } else {
-    // all other keypresses just ignore
+    // idk just blank for now
   }
 
   // if out of bounds
@@ -269,10 +191,13 @@ const moveSnake = () => {
   }
 
   generateSnake(playerData.head[0], playerData.head[1]);
-  if (playerData.body.size() > 0) {
+  if (playerData.body.length > 0) {
     console.log("generating body");
+    console.log(playerData.body);
     generateBody(playerData.body);
   }
+
+  // to wipe tail
   if (rearHolder) {
     clearTile(rearHolder);
   }
@@ -290,16 +215,19 @@ onkeydown = (e) => {
     foodInterval = setInterval(generateApple, 5000);
   }
   
+  // removes the 'Arrow'- prefix onkeydown event
   const keypress = e.key.slice(5);
+
+  // inits snake movement
   if (playerData.orientation === null) {
     snakeInterval = setInterval(moveSnake, 50);
     playerData.orientation = keypress;
     playerData.tempOrientation = keypress;
     return;
   }
-  // do keypress all conditions and stop
+
+  // validating keypresses
   // if the same as last. and if polar opposite
-  // removes the 'Arrow'- prefix onkeydown event
   switch (keypress) {
     case "Left":
       if (
@@ -342,23 +270,26 @@ const terminateGame = () => {
   } else {
     alert(`Game over! Click 'Okay' or Press <Enter> to restart.`);
   }
+  clearInterval(snakeInterval);
+  clearInterval(foodInterval);
+  // GOOD OL' MANUAL STATE RESETS
   prevX = 0;
   prevY = 0;
   playerData.orientation = null;
   playerData.tempOrientation = null;
-  playerData.head.length = 0;
+  playerData.head = [],
   playerData.highScore = Math.max(playerData.currScore, playerData.highScore);
   playerData.currScore = 0;
-  playerData.body = new Deque();
+  playerData.body = [],
   gameStarted = false;
   updateHighScore();
-  clearInterval(snakeInterval);
-  clearInterval(foodInterval);
   initBoard();
   generateApple(10, 30);
   generateSnake(30, 10);
 };
 
 // ------------------ START GAME ------------------ //
-terminateGame();
-// setInterval(generateApple, 10);
+initBoard();
+generateApple(10, 30);
+generateSnake(30, 10);
+alert(`Use <arrow> keys to move the snake!`)

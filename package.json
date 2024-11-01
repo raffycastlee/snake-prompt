@@ -1,12 +1,12 @@
 {
   "name": "snake-prompt",
   "version": "1.0.0",
-  "type": "module",
-  "description": "deployed [here]().inspired by [ben's snake app](https://benspector3.github.io/snake/)",
+  "description": "deployed [here](https://raffycastlee.github.io/snake-prompt/). inspired by [ben's snake app](https://benspector3.github.io/snake/)",
   "main": "script.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC"
 }
