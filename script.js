@@ -288,7 +288,8 @@ const terminateGame = () => {
   generateSnake(30, 10);
 };
 
-// ------------------ START GAME ------------------ //
+// ------------------ GAME START ------------------ //
+// - apateu-a-pateu apateu-a-pateu apateu-a-pateu - //
 initBoard();
 generateApple(10, 30);
 generateSnake(30, 10);
